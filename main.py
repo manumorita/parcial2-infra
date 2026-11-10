@@ -1,4 +1,3 @@
-
 import os
 import psycopg
 
@@ -8,9 +7,8 @@ from pydantic import BaseModel, EmailStr
 
 load_dotenv()
 
-app = FastAPI(
-    title="API Parcial 2 - Infraestructuras Paralelas"
-)
+app = FastAPI(title="API Parcial 2 - Infraestructuras Paralelas")
+
 
 def obtener_conexion():
     return psycopg.connect(
@@ -30,14 +28,13 @@ class Usuario(BaseModel):
 @app.on_event("startup")
 def crear_tabla():
     with obtener_conexion() as conexion:
-        with conexion.cursor() as cursor:
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS usuarios (
-                    id SERIAL PRIMARY KEY,
-                    nombre VARCHAR(100) NOT NULL,
-                    correo VARCHAR(150) UNIQUE NOT NULL
-                );
-            """)
+        conexion.execute("""
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id SERIAL PRIMARY KEY,
+                nombre VARCHAR(100) NOT NULL,
+                correo VARCHAR(150) UNIQUE NOT NULL
+            );
+        """)
 
 
 @app.get("/")
@@ -54,16 +51,18 @@ def health():
 def consultar_usuarios():
     try:
         with obtener_conexion() as conexion:
-            with conexion.cursor() as cursor:
-                cursor.execute(
-                    "SELECT id, nombre, correo FROM usuarios ORDER BY id"
-                )
-                usuarios = cursor.fetchall()
+            filas = conexion.execute(
+                "SELECT id, nombre, correo FROM usuarios ORDER BY id"
+            ).fetchall()
 
-        return [
-            {"id": u[0], "nombre": u[1], "correo": u[2]}
-            for u in usuarios
-        ]
+        lista_usuarios = []
+        for fila in filas:
+            lista_usuarios.append({
+                "id": fila[0],
+                "nombre": fila[1],
+                "correo": fila[2]
+            })
+        return lista_usuarios
 
     except Exception:
         raise HTTPException(
@@ -76,24 +75,19 @@ def consultar_usuarios():
 def registrar_usuario(usuario: Usuario):
     try:
         with obtener_conexion() as conexion:
-            with conexion.cursor() as cursor:
-                cursor.execute(
-                    """
-                    INSERT INTO usuarios (nombre, correo)
-                    VALUES (%s, %s)
-                    RETURNING id, nombre, correo
-                    """,
-                    (usuario.nombre, usuario.correo)
-                )
-                nuevo_usuario = cursor.fetchone()
+            fila = conexion.execute(
+                """
+                INSERT INTO usuarios (nombre, correo)
+                VALUES (%s, %s)
+                RETURNING id, nombre, correo
+                """,
+                (usuario.nombre, usuario.correo)
+            ).fetchone()
 
-        return {
-            "id": nuevo_usuario[0],
-            "nombre": nuevo_usuario[1],
-            "correo": nuevo_usuario[2]
-        }
+        return {"id": fila[0], "nombre": fila[1], "correo": fila[2]}
 
     except psycopg.errors.UniqueViolation:
+        # el correo tiene restricción UNIQUE en la tabla
         raise HTTPException(
             status_code=409,
             detail="Ese correo ya está registrado"
