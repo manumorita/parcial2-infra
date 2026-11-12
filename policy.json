@@ -11,7 +11,8 @@
   	"arn:aws:s3:::parcial-backups/manifiestos/postgres-pod.yaml",
   	"arn:aws:s3:::parcial-backups/manifiestos/postgres-service.yaml",
   	"arn:aws:s3:::parcial-backups/manifiestos/api-deployment.yaml",
-	"arn:aws:s3:::parcial-backups/manifiestos/nginx-pod.yaml"
+	"arn:aws:s3:::parcial-backups/manifiestos/nginx-pod.yaml",
+	"arn:aws:s3:::parcial-backups/manifiestos/api-service.yaml"
 	]
     },
     {
