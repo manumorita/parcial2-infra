@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject"],
+      "Resource": [
+  	"arn:aws:s3:::parcial-backups/db/backup_20261111_213114.sql",
+  	"arn:aws:s3:::parcial-backups/manifiestos/namespace.yaml",
+  	"arn:aws:s3:::parcial-backups/manifiestos/secret.yaml",
+  	"arn:aws:s3:::parcial-backups/manifiestos/postgres-pod.yaml",
+  	"arn:aws:s3:::parcial-backups/manifiestos/postgres-service.yaml",
+  	"arn:aws:s3:::parcial-backups/manifiestos/api-deployment.yaml",
+	"arn:aws:s3:::parcial-backups/manifiestos/nginx-pod.yaml"
+	]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": "arn:aws:s3:::parcial-backups"
+    }
+  ]
+}
